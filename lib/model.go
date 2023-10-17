@@ -15,6 +15,11 @@ type QueryBuilder interface {
 	BuildQuery() string
 }
 
+type GeoFeedResponse struct {
+	Status string `json:"status"`
+	Data   string `json:"data"`
+}
+
 type CityFeedResponseData struct {
 	IDX  int `json:"idx"`
 	AQI  int `json:"aqi"`

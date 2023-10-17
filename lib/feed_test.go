@@ -52,6 +52,91 @@ var cityFeedResponse = `
 }
 `
 
+var geoFeedResponse = `
+{
+	"status": "ok",
+	"data": "rainy day"
+}
+`
+
+func TestFeedService_GetIPFeed_Success(t *testing.T) {
+	var (
+		expectedResponse lib.GeoFeedResponse
+	)
+
+	FeedService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+
+		t.Run("URL and request method is as expected", func(t *testing.T) {
+			expectedURL := fmt.Sprintf("/feed/here/?token=%s", waqiApiKey)
+			assert.Equal(t, http.MethodGet, req.Method)
+			assert.Equal(t, expectedURL, req.URL.String())
+		})
+
+		var resp lib.GeoFeedResponse
+		err := payloadStringToStruct(geoFeedResponse, &resp)
+		require.Nil(t, err)
+
+		w.WriteHeader(http.StatusOK)
+		bb, _ := json.Marshal(resp)
+		w.Write(bb)
+	}))
+
+	defer FeedService.Close()
+
+	ctx := context.Background()
+
+	c := lib.NewAPIClient(waqiApiKey, &lib.Config{BackendURL: lib.MustParseURL(FeedService.URL)})
+	resp, err := c.FeedApi.IPFeed(ctx)
+	require.Nil(t, err)
+	assert.NotNil(t, resp)
+
+	t.Run("Response is as expected", func(t *testing.T) {
+		err := payloadStringToStruct(geoFeedResponse, &expectedResponse)
+		require.Nil(t, err)
+		assert.Equal(t, expectedResponse, resp)
+	})
+}
+
+func TestFeedService_GetGeoFeed_Success(t *testing.T) {
+	var (
+		expectedResponse lib.GeoFeedResponse
+		lng              = 37.7749
+		lat              = -122.4194
+	)
+
+	FeedService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+
+		t.Run("URL and request method is as expected", func(t *testing.T) {
+			expectedURL := fmt.Sprintf("/feed/geo:%v;%v/?token=%s", lng, lat, waqiApiKey)
+			assert.Equal(t, http.MethodGet, req.Method)
+			assert.Equal(t, expectedURL, req.URL.String())
+		})
+
+		var resp lib.GeoFeedResponse
+		err := payloadStringToStruct(geoFeedResponse, &resp)
+		require.Nil(t, err)
+
+		w.WriteHeader(http.StatusOK)
+		bb, _ := json.Marshal(resp)
+		w.Write(bb)
+	}))
+
+	defer FeedService.Close()
+
+	ctx := context.Background()
+
+	c := lib.NewAPIClient(waqiApiKey, &lib.Config{BackendURL: lib.MustParseURL(FeedService.URL)})
+	resp, err := c.FeedApi.GeoFeed(ctx, lng, lat)
+	require.Nil(t, err)
+	assert.NotNil(t, resp)
+
+	t.Run("Response is as expected", func(t *testing.T) {
+		err := payloadStringToStruct(geoFeedResponse, &expectedResponse)
+		require.Nil(t, err)
+		assert.Equal(t, expectedResponse, resp)
+	})
+}
+
 func TestFeedService_GetCityFeed_Success(t *testing.T) {
 	var (
 		expectedResponse lib.CityFeedResponse
