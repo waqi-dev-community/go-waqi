@@ -17,30 +17,58 @@ Sign up for an API key [here](https://aqicn.org/data-platform/token/)
 
 ### Making Requests
 
-**For City Feed:**
-
+Making Requests
 ```golang
-import (
-	"context"
-	"fmt"
-	"log"
 
+import (
 	waqi "github.com/waqi-dev-community/go-waqi/lib"
 )
 
-func main() {
-	apiKey := "<REPLACE_WITH_YOUR_API_KEY>"
-	ctx := context.Background()
-	waqiClient := waqi.NewAPIClient(apiKey, &waqi.Config{})
+apiKey := "<REPLACE_WITH_YOUR_API_KEY>"
+waqiClient := waqi.NewAPIClient(apiKey, &waqi.Config{})
+```
 
-	city := "shanghai"
-	cityFeed, err := waqiClient.FeedApi.GetCityFeed(ctx, city)
+**For City Feed:**
 
-	if err != nil {
-		log.Fatal("city feed error: ", err.Error())
-		return
-	}
+```golang
 
-	fmt.Println(cityFeed)
+
+city := "shanghai"
+cityFeed, err := waqiClient.FeedApi.GetCityFeed(ctx, city)
+
+if err != nil {
+	log.Fatal("city feed error: ", err.Error())
+	return
 }
+
+fmt.Println(cityFeed)
+```
+
+**For Lat/Lng based Geolocalized Feed:**
+
+```golang
+
+lat := 32.455
+lng := 10.322
+geoFeed, err := waqiClient.FeedApi.GeoFeed(ctx, lng, lat)
+
+if err != nil {
+	log.Fatal("geo feed error: ", err.Error())
+	return
+}
+
+fmt.Println(geoFeed)
+```
+
+**For IP based Geolocalized Feed:**
+
+```golang
+geoFeed, err := waqiClient.FeedApi.GeoFeed(ctx)
+
+if err != nil {
+	log.Fatal("ip feed error: ", err.Error())
+	return
+}
+
+fmt.Println(geoFeed)
 ```
